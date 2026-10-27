@@ -1,9 +1,9 @@
 /**
- * Iris Gift - Luxury 3D Present Box for Мишо
- * - 100% Glitch-free, authentic satin ribbons (clean straight straps + center interlocking rings + wavy draping tails)
- * - Zero tutorial/tracker text clutter (pure immersive luxury experience)
- * - Auto-zooms the card in high-res modal immediately upon opening
- * - No white light glare / reflection on card
+ * IRIS Gift - Experience Script
+ * - Initial sleek gray IRIS Gift Portal Dashboard with Notification Bell trigger
+ * - Cinematic 3D Gift Box with authentic PBR paper & woven satin ribbon textures
+ * - 100% glitch-free geometry, zero text clutter, zero audio code
+ * - Auto-zooms new birthday card immediately upon unboxing
  */
 
 (function () {
@@ -16,7 +16,7 @@
   const WALL_THICKNESS = 0.14;
   const BASE_HEIGHT = 0.18;
 
-  // Knot position on top of the box (offset right, matching inspiration.png)
+  // Knot position on top of the box
   const KNOT_X = 0.85;
   const KNOT_Z = 0.15;
   const KNOT_Y = BASE_HEIGHT + BOX_HEIGHT + 0.02;
@@ -24,123 +24,32 @@
   // Ribbon Dimensions
   const ORANGE_STRAP_W = 0.74;
   const BLUE_STRAP_W = 0.44;
-  const RIBBON_GAP = 0.38; // Distance between orange & blue ribbon centers
+  const RIBBON_GAP = 0.38;
 
   // --- State ---
   let orangeUntied = false;
   let blueUntied = false;
   let isBoxOpened = false;
   let canInteract = false;
-  let soundEnabled = true;
+  let sceneStarted = false;
 
   let activeDraggingRibbon = null; // 'orange' | 'blue'
   let hoveredRibbon = null;
-  let currentTension = 0;
 
-  // --- Web Audio Synthesizer ---
-  let audioCtx = null;
-  function initAudio() {
-    if (!audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) audioCtx = new AudioContext();
-    }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-  }
+  // --- DOM Elements ---
+  const portalView = document.getElementById('portalView');
+  const presentView = document.getElementById('presentView');
+  const notificationTrigger = document.getElementById('notificationTrigger');
+  const resetBtn = document.getElementById('resetBtn');
+  const cardModal = document.getElementById('cardModal');
+  const modalClose = document.getElementById('modalClose');
+  const modalBackdrop = document.getElementById('modalBackdrop');
 
-  function playSlideSound() {
-    if (!soundEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-    try {
-      const now = audioCtx.currentTime;
-      const bufferSize = Math.floor(audioCtx.sampleRate * 0.42);
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.32));
-      }
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(850, now);
-      filter.frequency.exponentialRampToValueAtTime(2600, now + 0.38);
-
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      noise.start(now);
-    } catch (e) {}
-  }
-
-  let lastTensionSoundTime = 0;
-  function playTensionSound(tension) {
-    if (!soundEnabled || tension < 0.15) return;
-    const nowMs = performance.now();
-    if (nowMs - lastTensionSoundTime < 90) return;
-    lastTensionSoundTime = nowMs;
-    initAudio();
-    if (!audioCtx) return;
-    try {
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(150 + tension * 130, now);
-      gain.gain.setValueAtTime(0.03 * tension, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.08);
-    } catch (e) {}
-  }
-
-  function playBoxOpenSound() {
-    if (!soundEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-    try {
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(110, now);
-      osc.frequency.exponentialRampToValueAtTime(38, now + 0.32);
-      gain.gain.setValueAtTime(0.28, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.36);
-
-      const freqs = [523.25, 659.25, 783.99, 1046.5];
-      freqs.forEach((freq, idx) => {
-        const cOsc = audioCtx.createOscillator();
-        const cGain = audioCtx.createGain();
-        cOsc.type = 'triangle';
-        cOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
-        cGain.gain.setValueAtTime(0.09, now + idx * 0.08);
-        cGain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.7);
-        cOsc.connect(cGain);
-        cGain.connect(audioCtx.destination);
-        cOsc.start(now + idx * 0.08);
-        cOsc.stop(now + idx * 0.08 + 0.75);
-      });
-    } catch (e) {}
-  }
-
-  // --- Three.js Scene & Renderer ---
+  // --- Three.js Scene Setup ---
   const container = document.getElementById('webglContainer');
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xcfe0f5);
-  scene.fog = new THREE.Fog(0xcfe0f5, 18, 42);
+  scene.background = new THREE.Color(0xdbeafe);
+  scene.fog = new THREE.Fog(0xdbeafe, 18, 42);
 
   const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, 8.2, 13.5);
@@ -187,7 +96,7 @@
   fillLight.position.set(6, 8, -5);
   scene.add(fillLight);
 
-  // Floor Shadow & Soft Contact Vignette
+  // Floor Shadow & Contact Vignette
   const floorMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(50, 50),
     new THREE.ShadowMaterial({ opacity: 0.22 })
@@ -216,7 +125,7 @@
   contactMesh.position.y = 0.003;
   scene.add(contactMesh);
 
-  // Textures
+  // Load PBR Textures
   const texLoader = new THREE.TextureLoader();
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
@@ -318,10 +227,9 @@
     return new THREE.BoxGeometry(w, h, d);
   }
 
-  // --- Clean Flat Ribbon Strap Helper (100% glitch-free, perfect rectangular mapping) ---
+  // Clean flat rectangular ribbon strap helper
   function createFlatStrap(width, length, material, vRepeat) {
     const geo = new THREE.PlaneGeometry(width, length);
-    // U runs 0..1 across width, V runs 0..length along length
     const uvAttr = geo.attributes.uv;
     for (let i = 0; i < uvAttr.count; i++) {
       const vVal = uvAttr.getY(i);
@@ -334,7 +242,7 @@
     return mesh;
   }
 
-  // --- Smooth Wavy Ribbon Tail Helper with V-Cut End (for interactive dragging) ---
+  // Smooth wavy ribbon tail helper with V-cut swallowtail notch
   function createWavyTailMesh(points, width, thickness, material) {
     const curve = new THREE.CatmullRomCurve3(points);
     const segsL = 28;
@@ -351,26 +259,23 @@
       const pt = curve.getPointAt(t);
       const tangent = curve.getTangentAt(t).normalize();
 
-      // Stable up vector (horizontal plane dominant)
       const up = new THREE.Vector3(0, 1, 0);
       const side = new THREE.Vector3().crossVectors(tangent, up).normalize();
       const normal = new THREE.Vector3().crossVectors(side, tangent).normalize();
 
-      // Slight taper at knot entry (t < 0.2)
       let curW = width;
       if (t < 0.2) {
         curW = width * (0.6 + 0.4 * (t / 0.2));
       }
 
       for (let j = 0; j <= segsW; j++) {
-        const u = j / segsW; // 0..1 across ribbon width
+        const u = j / segsW;
         const across = (u - 0.5) * curW;
         const arch = Math.sin(u * Math.PI) * thickness;
 
-        // V-cut (swallowtail) notch at the tail tip
         let vCut = 0;
         if (i === segsL) {
-          const distFromMid = Math.abs(u - 0.5) * 2.0; // 0 at center, 1 at edges
+          const distFromMid = Math.abs(u - 0.5) * 2.0;
           vCut = -(1.0 - distFromMid) * (width * 0.35);
         }
 
@@ -408,7 +313,7 @@
     return mesh;
   }
 
-  // --- Build 3D Box ---
+  // --- Build 3D Gift Box ---
   const presentGroup = new THREE.Group();
   scene.add(presentGroup);
 
@@ -445,13 +350,12 @@
   innerVelvetTop.receiveShadow = true;
   presentGroup.add(innerVelvetTop);
 
-  // 2. Birthday Card Mesh (Clean, pure-color, toneMapped: false)
+  // 2. Birthday Card Mesh (New Card: 721x1024, toneMapped: false)
   const cardGroup = new THREE.Group();
   cardGroup.position.set(0, BASE_HEIGHT + 0.46, 0);
   presentGroup.add(cardGroup);
 
   let cardHitMesh = null;
-  const cardModal = document.getElementById('cardModal');
 
   texLoader.load('card.png', (cardTex) => {
     cardTex.encoding = THREE.sRGBEncoding;
@@ -459,7 +363,7 @@
     cardTex.minFilter = THREE.LinearMipmapLinearFilter;
     cardTex.magFilter = THREE.LinearFilter;
 
-    const cardRatio = 700 / 990;
+    const cardRatio = 721 / 1024;
     const cardH = 4.35;
     const cardW = cardH * cardRatio;
 
@@ -483,7 +387,7 @@
     document.getElementById('loaderOverlay').classList.add('fade-out');
   });
 
-  // 3. The 4 Beveled Walls & Clean Straps (ZERO clipping, ZERO glitchy lines!)
+  // 3. The 4 Beveled Walls & Clean Straps
   const wallPivots = {};
 
   function buildLuxuryWall(name) {
@@ -492,7 +396,6 @@
     if (name === 'left') {
       pivot.position.set(-BOX_WIDTH / 2, BASE_HEIGHT, 0);
 
-      // Left Wall
       const wallMesh = new THREE.Mesh(
         makeRoundedBox(WALL_THICKNESS, BOX_HEIGHT, BOX_DEPTH, 0.035, 4),
         boxOuterMaterial
@@ -502,7 +405,6 @@
       wallMesh.receiveShadow = true;
       pivot.add(wallMesh);
 
-      // Velvet Interior
       const innerLining = new THREE.Mesh(
         new THREE.PlaneGeometry(BOX_HEIGHT - 0.16, BOX_DEPTH - 0.24),
         velvetInteriorMaterial
@@ -512,7 +414,6 @@
       innerLining.position.set(WALL_THICKNESS + 0.004, BOX_HEIGHT / 2, 0);
       pivot.add(innerLining);
 
-      // Left Lid Door
       const lidW = BOX_WIDTH / 2;
       const lidMesh = new THREE.Mesh(
         makeRoundedBox(lidW, WALL_THICKNESS, BOX_DEPTH, 0.035, 4),
@@ -523,7 +424,6 @@
       lidMesh.receiveShadow = true;
       pivot.add(lidMesh);
 
-      // Clean, straight horizontal straps on Left Lid (X: 0 -> lidW, Y: top surface)
       const topOrange = createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial);
       topOrange.rotation.x = -Math.PI / 2;
       topOrange.rotation.z = Math.PI / 2;
@@ -536,7 +436,6 @@
       topBlue.position.set(lidW / 2, BOX_HEIGHT + 0.009, KNOT_Z - RIBBON_GAP);
       pivot.add(topBlue);
 
-      // Clean horizontal straps running down the left outer wall (Y: 0 -> BOX_HEIGHT)
       const sideOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       sideOrange.rotation.y = -Math.PI / 2;
       sideOrange.position.set(-0.004, BOX_HEIGHT / 2, KNOT_Z);
@@ -578,7 +477,6 @@
       lidMesh.receiveShadow = true;
       pivot.add(lidMesh);
 
-      // Clean horizontal straps on Right Lid
       const topOrange = createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial);
       topOrange.rotation.x = -Math.PI / 2;
       topOrange.rotation.z = Math.PI / 2;
@@ -591,7 +489,6 @@
       topBlue.position.set(-lidW / 2, BOX_HEIGHT + 0.009, KNOT_Z - RIBBON_GAP);
       pivot.add(topBlue);
 
-      // Clean vertical straps running across the top of the right lid
       const localKnotX = KNOT_X - BOX_WIDTH / 2;
 
       const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_DEPTH, orangeRibbonMaterial);
@@ -604,7 +501,6 @@
       vertBlue.position.set(localKnotX + RIBBON_GAP, BOX_HEIGHT + 0.011, 0);
       pivot.add(vertBlue);
 
-      // Clean horizontal straps running down the right outer wall
       const sideOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       sideOrange.rotation.y = Math.PI / 2;
       sideOrange.position.set(0.004, BOX_HEIGHT / 2, KNOT_Z);
@@ -634,7 +530,6 @@
       innerLining.position.set(0, (BOX_HEIGHT - 0.02) / 2, WALL_THICKNESS + 0.004);
       pivot.add(innerLining);
 
-      // Clean vertical straps running down back wall
       const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       vertOrange.rotation.y = Math.PI;
       vertOrange.position.set(KNOT_X, BOX_HEIGHT / 2, -0.004);
@@ -665,7 +560,6 @@
       innerLining.position.set(0, (BOX_HEIGHT - 0.02) / 2, -WALL_THICKNESS - 0.004);
       pivot.add(innerLining);
 
-      // Clean vertical straps running down front wall
       const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       vertOrange.position.set(KNOT_X, BOX_HEIGHT / 2, 0.004);
       pivot.add(vertOrange);
@@ -684,7 +578,7 @@
   buildLuxuryWall('back');
   buildLuxuryWall('front');
 
-  // 4. Central Knot with Interlocking Iris Gift Metallic Rings (Clean, matching inspiration.png)
+  // 4. Center Rings
   const knotGroup = new THREE.Group();
   knotGroup.position.set(KNOT_X, KNOT_Y, KNOT_Z);
   presentGroup.add(knotGroup);
@@ -705,7 +599,7 @@
   ringBlueMesh.castShadow = true;
   knotGroup.add(ringBlueMesh);
 
-  // 5. Beautiful Wavy Satin Ribbon Tails (100% glitch-free, with V-notch cuts)
+  // 5. Wavy Ribbon Tails for Dragging
   const orangePointsDefault = [
     new THREE.Vector3(KNOT_X - 0.16, KNOT_Y + 0.11, KNOT_Z + 0.08),
     new THREE.Vector3(KNOT_X - 0.65, KNOT_Y + 0.19, KNOT_Z + 0.44),
@@ -730,7 +624,6 @@
   let blueTailMesh = createWavyTailMesh(bluePoints, 0.48, 0.024, blueRibbonMaterial);
   presentGroup.add(blueTailMesh);
 
-  // Hit Colliders for grabbing
   const hitGeo = new THREE.SphereGeometry(0.65, 12, 12);
   const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
@@ -760,7 +653,7 @@
     blueHit.position.copy(bluePoints[3]);
   }
 
-  // --- Subtle Golden Dust on Open ---
+  // Golden Dust on Open
   let dustParticles = [];
   const dustGroup = new THREE.Group();
   scene.add(dustGroup);
@@ -848,6 +741,26 @@
     }, '-=0.45');
   }
 
+  // --- Enter Present View from Notification Bell ---
+  function enterPresentExperience() {
+    if (sceneStarted) return;
+    sceneStarted = true;
+
+    // Transition portal dashboard out
+    portalView.classList.add('portal-hidden');
+    presentView.classList.add('active-scene');
+
+    // Start 3D orbit intro
+    setTimeout(playCinematicCameraIntro, 350);
+  }
+
+  notificationTrigger.addEventListener('click', enterPresentExperience);
+  notificationTrigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      enterPresentExperience();
+    }
+  });
+
   // --- Interactive Ribbon Dragging ---
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -869,7 +782,6 @@
 
   function onPointerDown(e) {
     if (!canInteract || isBoxOpened) return;
-    initAudio();
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -920,63 +832,61 @@
         orangePoints[4].z = planeIntersect.z;
 
         const d = orangePoints[4].distanceTo(orangePointsDefault[4]);
-        currentTension = Math.min(d / 1.05, 1.0);
+        const tension = Math.min(d / 1.05, 1.0);
 
         for (let k = 1; k <= 3; k++) {
           const frac = k / 4;
           orangePoints[k].x = THREE.MathUtils.lerp(
             orangePointsDefault[k].x,
             THREE.MathUtils.lerp(orangePointsDefault[0].x, planeIntersect.x, frac),
-            currentTension * 0.75
+            tension * 0.75
           );
           orangePoints[k].z = THREE.MathUtils.lerp(
             orangePointsDefault[k].z,
             THREE.MathUtils.lerp(orangePointsDefault[0].z, planeIntersect.z, frac),
-            currentTension * 0.75
+            tension * 0.75
           );
           orangePoints[k].y = THREE.MathUtils.lerp(
             orangePointsDefault[k].y,
             KNOT_Y + 0.12,
-            currentTension * 0.65
+            tension * 0.65
           );
         }
         updateOrangeTailMesh();
 
-        knotGroup.position.x = KNOT_X - currentTension * 0.08;
-        knotGroup.position.z = KNOT_Z + currentTension * 0.05;
+        knotGroup.position.x = KNOT_X - tension * 0.08;
+        knotGroup.position.z = KNOT_Z + tension * 0.05;
 
       } else if (activeDraggingRibbon === 'blue') {
         bluePoints[4].x = planeIntersect.x;
         bluePoints[4].z = planeIntersect.z;
 
         const d = bluePoints[4].distanceTo(bluePointsDefault[4]);
-        currentTension = Math.min(d / 1.05, 1.0);
+        const tension = Math.min(d / 1.05, 1.0);
 
         for (let k = 1; k <= 3; k++) {
           const frac = k / 4;
           bluePoints[k].x = THREE.MathUtils.lerp(
             bluePointsDefault[k].x,
             THREE.MathUtils.lerp(bluePointsDefault[0].x, planeIntersect.x, frac),
-            currentTension * 0.75
+            tension * 0.75
           );
           bluePoints[k].z = THREE.MathUtils.lerp(
             bluePointsDefault[k].z,
             THREE.MathUtils.lerp(bluePointsDefault[0].z, planeIntersect.z, frac),
-            currentTension * 0.75
+            tension * 0.75
           );
           bluePoints[k].y = THREE.MathUtils.lerp(
             bluePointsDefault[k].y,
             KNOT_Y + 0.12,
-            currentTension * 0.65
+            tension * 0.65
           );
         }
         updateBlueTailMesh();
 
-        knotGroup.position.x = KNOT_X + currentTension * 0.08;
-        knotGroup.position.z = KNOT_Z + currentTension * 0.05;
+        knotGroup.position.x = KNOT_X + tension * 0.08;
+        knotGroup.position.z = KNOT_Z + tension * 0.05;
       }
-
-      playTensionSound(currentTension);
     }
   }
 
@@ -1025,10 +935,8 @@
     }
   }
 
-  // --- Smooth Unthreading & Slide-off Animation ---
+  // --- Smooth Ribbon Slide-Off Animation ---
   function animateRibbonSlide(ribbon) {
-    playSlideSound();
-
     if (ribbon === 'orange') {
       orangeUntied = true;
 
@@ -1086,8 +994,6 @@
     gsap.to(knotGroup.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.6, ease: 'power2.in' });
     gsap.to(knotGroup.rotation, { y: Math.PI * 2.5, duration: 0.6 });
 
-    playBoxOpenSound();
-
     // 4 Walls fall flat outward
     gsap.to(wallPivots.left.rotation, {
       z: Math.PI * 0.5,
@@ -1134,7 +1040,7 @@
     });
 
     setTimeout(createSubtleGoldDust, 400);
-    document.getElementById('resetBtn').style.display = 'inline-flex';
+    resetBtn.style.display = 'inline-flex';
 
     // DIRECTLY AUTO-OPEN & ZOOM THE CARD INTO FULLSCREEN LIGHTBOX!
     setTimeout(() => {
@@ -1149,7 +1055,7 @@
     blueUntied = false;
 
     cardModal.classList.remove('active');
-    document.getElementById('resetBtn').style.display = 'none';
+    resetBtn.style.display = 'none';
 
     gsap.to(wallPivots.left.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
     gsap.to(wallPivots.right.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
@@ -1184,24 +1090,14 @@
     }
   }
 
-  document.getElementById('modalClose').addEventListener('click', () => {
+  modalClose.addEventListener('click', () => {
     cardModal.classList.remove('active');
   });
-  document.getElementById('modalBackdrop').addEventListener('click', () => {
+  modalBackdrop.addEventListener('click', () => {
     cardModal.classList.remove('active');
   });
 
-  document.getElementById('soundToggle').addEventListener('click', () => {
-    soundEnabled = !soundEnabled;
-    document.getElementById('soundOnIcon').style.display = soundEnabled ? 'block' : 'none';
-    document.getElementById('soundOffIcon').style.display = soundEnabled ? 'none' : 'block';
-  });
-
-  document.getElementById('replayIntroBtn').addEventListener('click', () => {
-    if (!isBoxOpened) playCinematicCameraIntro();
-  });
-
-  document.getElementById('resetBtn').addEventListener('click', resetBox);
+  resetBtn.addEventListener('click', resetBox);
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -1217,7 +1113,7 @@
   window.addEventListener('touchend', onPointerUp);
   window.addEventListener('click', onSceneClick);
 
-  // --- Animation Loop ---
+  // Animation Loop
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
@@ -1234,7 +1130,5 @@
     renderer.render(scene, camera);
   }
   animate();
-
-  setTimeout(playCinematicCameraIntro, 500);
 
 })();

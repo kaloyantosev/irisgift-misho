@@ -1,11 +1,14 @@
 :root {
-  --bg-studio: #cfe0f5;
-  --bg-studio-radial: radial-gradient(circle at 50% 40%, #eaf2fc 0%, #cfe0f5 55%, #b6cde6 100%);
-  --ribbon-orange: #ea580c;
-  --ribbon-blue: #1d4ed8;
-  --gold-accent: #d97706;
-  --text-dark: #0f172a;
-  --text-muted: #475569;
+  --font-main: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bg-gray-portal: #f3f5f9;
+  --bg-gray-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-subtle: #e2e8f0;
+  --iris-orange: #f26f21;
+  --iris-blue: #0284c7;
+  --iris-dark-blue: #0b1e3b;
 }
 
 * {
@@ -20,19 +23,374 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--bg-studio);
-  background-image: var(--bg-studio-radial);
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text-dark);
+  background-color: var(--bg-gray-portal);
+  font-family: var(--font-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* 3D WebGL Canvas */
+/* ==========================================================================
+   FLOATING BLURRED AMBIENT ORBS (IRIS PAY BACKGROUND STYLE)
+   ========================================================================== */
+.ambient-orbs-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(85px);
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+  will-change: transform;
+}
+
+.orb-orange {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(242, 111, 33, 0.65) 0%, rgba(242, 111, 33, 0) 70%);
+  top: -100px;
+  right: -50px;
+  animation: floatOrbOrange 18s ease-in-out infinite alternate;
+}
+
+.orb-blue {
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.6) 0%, rgba(2, 132, 199, 0) 70%);
+  bottom: -150px;
+  left: -80px;
+  animation: floatOrbBlue 22s ease-in-out infinite alternate;
+}
+
+.orb-cyan {
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, rgba(56, 189, 248, 0) 70%);
+  top: 30%;
+  left: 25%;
+  animation: floatOrbCyan 25s ease-in-out infinite alternate;
+}
+
+.orb-amber {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(245, 158, 11, 0) 70%);
+  bottom: 20%;
+  right: 20%;
+  animation: floatOrbAmber 20s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrbOrange {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-80px, 120px) scale(1.12); }
+  100% { transform: translate(-160px, 40px) scale(0.95); }
+}
+
+@keyframes floatOrbBlue {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(120px, -90px) scale(1.15); }
+  100% { transform: translate(60px, -180px) scale(0.9); }
+}
+
+@keyframes floatOrbCyan {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-100px, -60px) scale(0.88); }
+  100% { transform: translate(80px, 90px) scale(1.1); }
+}
+
+@keyframes floatOrbAmber {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(70px, -80px) scale(1.1); }
+  100% { transform: translate(-90px, -40px) scale(0.92); }
+}
+
+/* ==========================================================================
+   SCREEN 1: SLEEK GRAY IRIS GIFT PORTAL DASHBOARD
+   ========================================================================== */
+.portal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: rgba(243, 245, 249, 0.88);
+  backdrop-filter: blur(25px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-overlay.portal-hidden {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+/* Portal Header */
+.portal-header {
+  padding: 20px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.portal-brand-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--iris-dark-blue);
+}
+
+.brand-highlight {
+  color: var(--iris-orange);
+  font-weight: 800;
+}
+
+/* The Active Clickable Notification Bell */
+.portal-notification-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: #ffffff;
+  border: 1px solid rgba(242, 111, 33, 0.25);
+  box-shadow: 0 4px 18px rgba(242, 111, 33, 0.15), 0 2px 6px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.portal-notification-wrapper:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(242, 111, 33, 0.5);
+  box-shadow: 0 8px 24px rgba(242, 111, 33, 0.25), 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.portal-notification-wrapper:active {
+  transform: scale(0.98);
+}
+
+.bell-icon-box {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(242, 111, 33, 0.1);
+  color: var(--iris-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bell-svg {
+  animation: bellWiggle 2.8s infinite ease-in-out;
+  transform-origin: top center;
+}
+
+@keyframes bellWiggle {
+  0%, 65%, 100% { transform: rotate(0); }
+  70% { transform: rotate(14deg); }
+  75% { transform: rotate(-12deg); }
+  80% { transform: rotate(10deg); }
+  85% { transform: rotate(-6deg); }
+  90% { transform: rotate(0); }
+}
+
+.bell-badge-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.notification-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--iris-orange);
+  box-shadow: 0 0 10px var(--iris-orange);
+  animation: pulseDot 1.6s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.85); opacity: 0.6; }
+}
+
+.notification-text {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--iris-dark-blue);
+  letter-spacing: -0.2px;
+}
+
+/* Portal Main Body */
+.portal-main {
+  flex: 1;
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.portal-hero {
+  margin-bottom: 40px;
+}
+
+.portal-subtitle {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--iris-blue);
+  margin-bottom: 8px;
+}
+
+.portal-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--iris-dark-blue);
+  letter-spacing: -0.8px;
+}
+
+/* The 3 Portal Action Cards (Cosmetic / Inactive) */
+.portal-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.portal-btn-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.portal-btn-card.inactive {
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
+.portal-btn-card.inactive:hover {
+  border-color: rgba(203, 213, 225, 1);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.card-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.card-icon-wrap.icon-plus {
+  background: rgba(2, 132, 199, 0.1);
+  color: var(--iris-blue);
+}
+
+.card-icon-wrap.icon-clock {
+  background: rgba(242, 111, 33, 0.1);
+  color: var(--iris-orange);
+}
+
+.card-icon-wrap.icon-history {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--iris-dark-blue);
+  margin-bottom: 8px;
+}
+
+.card-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.card-arrow {
+  margin-top: auto;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   SCREEN 2: 3D GIFT BOX SCENE
+   ========================================================================== */
+.present-view-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease 0.1s;
+}
+
+.present-view-container.active-scene {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 #webglContainer {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
 }
 
 #webglContainer canvas {
@@ -41,18 +399,18 @@ html, body {
   display: block;
 }
 
-/* Header */
+/* 3D View Top Bar */
 .top-bar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
-  padding: 16px 32px;
+  padding: 16px 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(180deg, rgba(234, 242, 252, 0.85) 0%, rgba(234, 242, 252, 0) 100%);
+  background: linear-gradient(180deg, rgba(243, 245, 249, 0.88) 0%, rgba(243, 245, 249, 0) 100%);
   backdrop-filter: blur(8px);
   pointer-events: none;
 }
@@ -67,41 +425,11 @@ html, body {
   gap: 12px;
 }
 
-.brand-rings {
-  position: relative;
-  width: 26px;
-  height: 26px;
-}
-
-.ring-mini {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 3.5px solid;
-}
-
-.ring-mini.orange {
-  top: 0;
-  left: 0;
-  border-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
-}
-
-.ring-mini.blue {
-  bottom: 0;
-  right: 0;
-  border-color: #3b82f6;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-}
-
 .brand-text {
-  font-family: 'Cinzel', serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #0b192c;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--iris-dark-blue);
 }
 
 .header-actions {
@@ -110,37 +438,15 @@ html, body {
   gap: 12px;
 }
 
-.icon-btn {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(15, 23, 42, 0.14);
-  color: #0f172a;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transition: all 0.25s ease;
-  backdrop-filter: blur(10px);
-}
-
-.icon-btn:hover {
-  background: #ffffff;
-  transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
 .pill-btn {
-  background: rgba(255, 255, 255, 0.88);
+  background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.15);
   color: #0f172a;
   padding: 9px 20px;
   border-radius: 24px;
   font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -157,17 +463,19 @@ html, body {
 }
 
 .pill-btn.highlight {
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  background: linear-gradient(135deg, var(--iris-orange) 0%, #c2410c 100%);
   border-color: rgba(255, 255, 255, 0.35);
   color: #ffffff;
-  box-shadow: 0 4px 18px rgba(234, 88, 12, 0.4);
+  box-shadow: 0 4px 18px rgba(242, 111, 33, 0.4);
 }
 
 .pill-btn.highlight:hover {
-  box-shadow: 0 6px 24px rgba(234, 88, 12, 0.6);
+  box-shadow: 0 6px 24px rgba(242, 111, 33, 0.6);
 }
 
-/* Lightbox Modal */
+/* ==========================================================================
+   HIGH-RES ZOOMED CARD MODAL (AUTO-OPENS ON UNBOXING)
+   ========================================================================== */
 .card-modal {
   position: fixed;
   inset: 0;
@@ -177,7 +485,7 @@ html, body {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-modal.active {
@@ -188,8 +496,8 @@ html, body {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(8, 18, 36, 0.82);
-  backdrop-filter: blur(14px);
+  background: rgba(11, 26, 48, 0.82);
+  backdrop-filter: blur(16px);
 }
 
 .modal-wrapper {
@@ -197,7 +505,7 @@ html, body {
   z-index: 10;
   max-width: 92vw;
   max-height: 92vh;
-  transform: scale(0.65) translateY(40px);
+  transform: scale(0.7) translateY(35px);
   opacity: 0;
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
 }
@@ -211,8 +519,8 @@ html, body {
   max-width: 100%;
   max-height: 90vh;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.65), 0 0 30px rgba(234, 88, 12, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.7), 0 0 35px rgba(242, 111, 33, 0.25);
   display: block;
 }
 
@@ -223,7 +531,7 @@ html, body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #ea580c;
+  background: var(--iris-orange);
   border: 2px solid #ffffff;
   color: #ffffff;
   font-size: 26px;
@@ -241,18 +549,20 @@ html, body {
   background: #c2410c;
 }
 
-/* Loading Overlay */
+/* ==========================================================================
+   LOADING OVERLAY
+   ========================================================================== */
 .loader-overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: #cfe0f5;
+  background: #f3f5f9;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  transition: opacity 0.6s ease;
+  gap: 16px;
+  transition: opacity 0.5s ease;
 }
 
 .loader-overlay.fade-out {
@@ -260,58 +570,32 @@ html, body {
   pointer-events: none;
 }
 
-.loader-spinner {
-  position: relative;
+.loader-logo-pulse {
   width: 60px;
   height: 60px;
+  animation: logoPulse 1.8s infinite ease-in-out;
 }
 
-.ring-loader {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 4.5px solid transparent;
-  animation: spinLoader 1.4s linear infinite;
-}
-
-.ring-loader.orange {
-  top: 0;
-  left: 0;
-  border-top-color: #f59e0b;
-  border-right-color: #f59e0b;
-}
-
-.ring-loader.blue {
-  bottom: 0;
-  right: 0;
-  border-bottom-color: #3b82f6;
-  border-left-color: #3b82f6;
-  animation-direction: reverse;
-}
-
-@keyframes spinLoader {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes logoPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.75; }
+  50% { transform: scale(1.08); opacity: 1; }
 }
 
 .loader-text {
-  font-family: 'Cinzel', serif;
-  letter-spacing: 2px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #0b192c;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.2px;
+  color: var(--iris-dark-blue);
 }
 
-@media (max-width: 768px) {
-  .top-bar {
-    padding: 12px 16px;
+@media (max-width: 900px) {
+  .portal-header {
+    padding: 16px 20px;
   }
-  .brand-text {
-    font-size: 0.85rem;
+  .portal-cards-grid {
+    grid-template-columns: 1fr;
   }
-  .hud-status {
-    padding: 9px 20px;
-    font-size: 0.85rem;
+  .portal-title {
+    font-size: 1.7rem;
   }
 }
