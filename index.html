@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Честит Рожден Ден, Мишо! 🎁 | Iris Gift 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Three.js, Helpers, and GSAP -->
+  <script src="three.min.js"></script>
+  <script src="RoundedBoxGeometry.js"></script>
+  <script src="RoomEnvironment.js"></script>
+  <script src="gsap.min.js"></script>
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="top-bar">
+    <div class="brand-tag">
+      <div class="brand-rings">
+        <span class="ring-mini orange"></span>
+        <span class="ring-mini blue"></span>
+      </div>
+      <span class="brand-text">Iris Gift • Специален подарък за Мишо</span>
+    </div>
+
+    <div class="header-actions">
+      <button id="soundToggle" class="icon-btn" title="Звук Вкл./Изкл." aria-label="Звук">
+        <svg id="soundOnIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+        <svg id="soundOffIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+      </button>
+
+      <button id="replayIntroBtn" class="pill-btn" title="Повтори 3D обиколката">
+        <span>3D Обиколка</span>
+      </button>
+
+      <button id="resetBtn" class="pill-btn highlight" style="display: none;">
+        <span>Опаковай отново</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 3D WebGL Canvas Container -->
+  <div id="webglContainer"></div>
+
+  <!-- High-Res Card Lightbox Modal -->
+  <div class="card-modal" id="cardModal">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-wrapper">
+      <button class="modal-close" id="modalClose" aria-label="Затвори">&times;</button>
+      <img src="card.png" alt="Картичка за рождения ден на Мишо" class="modal-image">
+    </div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader-spinner">
+      <div class="ring-loader orange"></div>
+      <div class="ring-loader blue"></div>
+    </div>
+    <div class="loader-text">Зареждане на реалистичния подарък...</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
