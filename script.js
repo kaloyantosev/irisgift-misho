@@ -55,15 +55,15 @@
     const isPortrait = aspect < 1.0;
 
     let fov = 38;
-    let topY = 11.5;
-    let orbitR = 12.5;
-    let orbitH = 6.4;
+    let topY = 12.2;
+    let orbitR = 12.8;
+    let orbitH = 6.6;
 
     if (isPortrait) {
-      fov = 48;
-      topY = Math.min(18.0, 11.8 / Math.max(aspect * 1.15, 0.58));
-      orbitR = Math.min(15.0, 11.2 / Math.max(aspect * 1.15, 0.65));
-      orbitH = 7.2;
+      fov = Math.min(56, 38 / Math.max(aspect * 1.12, 0.48));
+      topY = 13.5 / Math.max(aspect * 1.1, 0.58);
+      orbitR = 14.5 / Math.max(aspect * 1.15, 0.65);
+      orbitH = 7.8;
     }
 
     return { aspect, isPortrait, fov, topY, orbitR, orbitH };
@@ -414,20 +414,6 @@
 
   // 3. The 4 Beveled Walls & Clean Straps
   const wallPivots = {};
-  const ribbonOrangeParts = [];
-  const ribbonBlueParts = [];
-
-  function addOrangeStrap(strap) {
-    strap.userData = { ribbon: 'orange' };
-    ribbonOrangeParts.push(strap);
-    return strap;
-  }
-
-  function addBlueStrap(strap) {
-    strap.userData = { ribbon: 'blue' };
-    ribbonBlueParts.push(strap);
-    return strap;
-  }
 
   function buildLuxuryWall(name) {
     const pivot = new THREE.Group();
@@ -463,24 +449,24 @@
       lidMesh.receiveShadow = true;
       pivot.add(lidMesh);
 
-      const topOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial));
+      const topOrange = createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial);
       topOrange.rotation.x = -Math.PI / 2;
       topOrange.rotation.z = Math.PI / 2;
       topOrange.position.set(lidW / 2, BOX_HEIGHT + 0.008, KNOT_Z);
       pivot.add(topOrange);
 
-      const topBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, lidW, blueRibbonMaterial));
+      const topBlue = createFlatStrap(BLUE_STRAP_W, lidW, blueRibbonMaterial);
       topBlue.rotation.x = -Math.PI / 2;
       topBlue.rotation.z = Math.PI / 2;
       topBlue.position.set(lidW / 2, BOX_HEIGHT + 0.009, KNOT_Z - RIBBON_GAP);
       pivot.add(topBlue);
 
-      const sideOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial));
+      const sideOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       sideOrange.rotation.y = -Math.PI / 2;
       sideOrange.position.set(-0.004, BOX_HEIGHT / 2, KNOT_Z);
       pivot.add(sideOrange);
 
-      const sideBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial));
+      const sideBlue = createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial);
       sideBlue.rotation.y = -Math.PI / 2;
       sideBlue.position.set(-0.004, BOX_HEIGHT / 2, KNOT_Z - RIBBON_GAP);
       pivot.add(sideBlue);
@@ -516,13 +502,13 @@
       lidMesh.receiveShadow = true;
       pivot.add(lidMesh);
 
-      const topOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial));
+      const topOrange = createFlatStrap(ORANGE_STRAP_W, lidW, orangeRibbonMaterial);
       topOrange.rotation.x = -Math.PI / 2;
       topOrange.rotation.z = Math.PI / 2;
       topOrange.position.set(-lidW / 2, BOX_HEIGHT + 0.008, KNOT_Z);
       pivot.add(topOrange);
 
-      const topBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, lidW, blueRibbonMaterial));
+      const topBlue = createFlatStrap(BLUE_STRAP_W, lidW, blueRibbonMaterial);
       topBlue.rotation.x = -Math.PI / 2;
       topBlue.rotation.z = Math.PI / 2;
       topBlue.position.set(-lidW / 2, BOX_HEIGHT + 0.009, KNOT_Z - RIBBON_GAP);
@@ -530,22 +516,22 @@
 
       const localKnotX = KNOT_X - BOX_WIDTH / 2;
 
-      const vertOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, BOX_DEPTH, orangeRibbonMaterial));
+      const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_DEPTH, orangeRibbonMaterial);
       vertOrange.rotation.x = -Math.PI / 2;
       vertOrange.position.set(localKnotX, BOX_HEIGHT + 0.01, 0);
       pivot.add(vertOrange);
 
-      const vertBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, BOX_DEPTH, blueRibbonMaterial));
+      const vertBlue = createFlatStrap(BLUE_STRAP_W, BOX_DEPTH, blueRibbonMaterial);
       vertBlue.rotation.x = -Math.PI / 2;
       vertBlue.position.set(localKnotX + RIBBON_GAP, BOX_HEIGHT + 0.011, 0);
       pivot.add(vertBlue);
 
-      const sideOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial));
+      const sideOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       sideOrange.rotation.y = Math.PI / 2;
       sideOrange.position.set(0.004, BOX_HEIGHT / 2, KNOT_Z);
       pivot.add(sideOrange);
 
-      const sideBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial));
+      const sideBlue = createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial);
       sideBlue.rotation.y = Math.PI / 2;
       sideBlue.position.set(0.004, BOX_HEIGHT / 2, KNOT_Z - RIBBON_GAP);
       pivot.add(sideBlue);
@@ -569,12 +555,12 @@
       innerLining.position.set(0, (BOX_HEIGHT - 0.02) / 2, WALL_THICKNESS + 0.004);
       pivot.add(innerLining);
 
-      const vertOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial));
+      const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       vertOrange.rotation.y = Math.PI;
       vertOrange.position.set(KNOT_X, BOX_HEIGHT / 2, -0.004);
       pivot.add(vertOrange);
 
-      const vertBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial));
+      const vertBlue = createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial);
       vertBlue.rotation.y = Math.PI;
       vertBlue.position.set(KNOT_X + RIBBON_GAP, BOX_HEIGHT / 2, -0.004);
       pivot.add(vertBlue);
@@ -599,11 +585,11 @@
       innerLining.position.set(0, (BOX_HEIGHT - 0.02) / 2, -WALL_THICKNESS - 0.004);
       pivot.add(innerLining);
 
-      const vertOrange = addOrangeStrap(createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial));
+      const vertOrange = createFlatStrap(ORANGE_STRAP_W, BOX_HEIGHT, orangeRibbonMaterial);
       vertOrange.position.set(KNOT_X, BOX_HEIGHT / 2, 0.004);
       pivot.add(vertOrange);
 
-      const vertBlue = addBlueStrap(createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial));
+      const vertBlue = createFlatStrap(BLUE_STRAP_W, BOX_HEIGHT, blueRibbonMaterial);
       vertBlue.position.set(KNOT_X + RIBBON_GAP, BOX_HEIGHT / 2, 0.004);
       pivot.add(vertBlue);
     }
@@ -629,7 +615,6 @@
   ringOrangeMesh.rotation.y = -0.18;
   ringOrangeMesh.position.set(-0.2, 0.16, 0.04);
   ringOrangeMesh.castShadow = true;
-  ringOrangeMesh.userData = { ribbon: 'orange' };
   knotGroup.add(ringOrangeMesh);
 
   const ringBlueMesh = new THREE.Mesh(ringGeo, ringBlueMaterial);
@@ -637,7 +622,6 @@
   ringBlueMesh.rotation.y = 0.28;
   ringBlueMesh.position.set(0.25, 0.19, -0.08);
   ringBlueMesh.castShadow = true;
-  ringBlueMesh.userData = { ribbon: 'blue' };
   knotGroup.add(ringBlueMesh);
 
   // 5. Wavy Ribbon Tails for Dragging
@@ -660,23 +644,21 @@
   let bluePoints = bluePointsDefault.map(p => p.clone());
 
   let orangeTailMesh = createWavyTailMesh(orangePoints, 0.72, 0.026, orangeRibbonMaterial);
-  orangeTailMesh.userData = { ribbon: 'orange' };
   presentGroup.add(orangeTailMesh);
 
   let blueTailMesh = createWavyTailMesh(bluePoints, 0.48, 0.024, blueRibbonMaterial);
-  blueTailMesh.userData = { ribbon: 'blue' };
   presentGroup.add(blueTailMesh);
 
-  const hitGeo = new THREE.SphereGeometry(2.2, 16, 16);
+  const hitGeo = new THREE.SphereGeometry(1.05, 12, 12);
   const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
   const orangeHit = new THREE.Mesh(hitGeo, hitMat);
-  orangeHit.position.copy(orangePoints[2]);
+  orangeHit.position.copy(orangePoints[3]);
   orangeHit.userData = { ribbon: 'orange' };
   presentGroup.add(orangeHit);
 
   const blueHit = new THREE.Mesh(hitGeo, hitMat);
-  blueHit.position.copy(bluePoints[2]);
+  blueHit.position.copy(bluePoints[3]);
   blueHit.userData = { ribbon: 'blue' };
   presentGroup.add(blueHit);
 
@@ -684,18 +666,16 @@
     presentGroup.remove(orangeTailMesh);
     orangeTailMesh.geometry.dispose();
     orangeTailMesh = createWavyTailMesh(orangePoints, 0.72, 0.026, orangeRibbonMaterial);
-    orangeTailMesh.userData = { ribbon: 'orange' };
     presentGroup.add(orangeTailMesh);
-    orangeHit.position.copy(orangePoints[2]);
+    orangeHit.position.copy(orangePoints[3]);
   }
 
   function updateBlueTailMesh() {
     presentGroup.remove(blueTailMesh);
     blueTailMesh.geometry.dispose();
     blueTailMesh = createWavyTailMesh(bluePoints, 0.48, 0.024, blueRibbonMaterial);
-    blueTailMesh.userData = { ribbon: 'blue' };
     presentGroup.add(blueTailMesh);
-    blueHit.position.copy(bluePoints[2]);
+    blueHit.position.copy(bluePoints[3]);
   }
 
   // Celebration Confetti System (Sprays Left & Right)
@@ -954,24 +934,17 @@
   const mouse = new THREE.Vector2();
   const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -(KNOT_Y + 0.1));
   const planeIntersect = new THREE.Vector3();
-  let pointerStartPos = { x: 0, y: 0, time: 0 };
 
   function getRibbonTargets() {
     const targets = [];
-    if (!orangeUntied) {
-      targets.push(orangeHit, orangeTailMesh, ringOrangeMesh, ...ribbonOrangeParts);
-    }
-    if (!blueUntied) {
-      targets.push(blueHit, blueTailMesh, ringBlueMesh, ...ribbonBlueParts);
-    }
+    if (!orangeUntied) targets.push(orangeHit, orangeTailMesh);
+    if (!blueUntied) targets.push(blueHit, blueTailMesh);
     return targets;
   }
 
   function resolveRibbonFromHit(obj) {
-    if (!obj) return null;
-    if (obj.userData && obj.userData.ribbon) return obj.userData.ribbon;
-    if (obj === orangeHit || obj === orangeTailMesh || obj === ringOrangeMesh || ribbonOrangeParts.includes(obj)) return 'orange';
-    if (obj === blueHit || obj === blueTailMesh || obj === ringBlueMesh || ribbonBlueParts.includes(obj)) return 'blue';
+    if (obj === orangeHit || obj === orangeTailMesh) return 'orange';
+    if (obj === blueHit || obj === blueTailMesh) return 'blue';
     return null;
   }
 
@@ -980,7 +953,6 @@
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    pointerStartPos = { x: clientX, y: clientY, time: Date.now() };
 
     mouse.x = (clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -991,13 +963,11 @@
     if (intersects.length > 0) {
       const picked = resolveRibbonFromHit(intersects[0].object);
       if (picked === 'orange' && !orangeUntied) {
-        orangePoints.forEach(pt => gsap.killTweensOf(pt));
         activeDraggingRibbon = 'orange';
         document.body.style.cursor = 'grabbing';
         if (dragHint) dragHint.classList.remove('visible');
         if (e.cancelable) e.preventDefault();
       } else if (picked === 'blue' && !blueUntied) {
-        bluePoints.forEach(pt => gsap.killTweensOf(pt));
         activeDraggingRibbon = 'blue';
         document.body.style.cursor = 'grabbing';
         if (dragHint) dragHint.classList.remove('visible');
@@ -1093,7 +1063,7 @@
     }
   }
 
-  function onPointerUp(e) {
+  function onPointerUp() {
     if (!activeDraggingRibbon) return;
     const ribbon = activeDraggingRibbon;
     activeDraggingRibbon = null;
@@ -1103,15 +1073,12 @@
 
     gsap.to(knotGroup.position, { x: KNOT_X, z: KNOT_Z, duration: 0.3, ease: 'power2.out' });
 
-    const clientX = e && e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : (e && typeof e.clientX === 'number' ? e.clientX : pointerStartPos.x);
-    const clientY = e && e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : (e && typeof e.clientY === 'number' ? e.clientY : pointerStartPos.y);
-    const screenMoveDist = Math.hypot((clientX || pointerStartPos.x) - pointerStartPos.x, (clientY || pointerStartPos.y) - pointerStartPos.y);
-    const touchDuration = Date.now() - pointerStartPos.time;
-    const isQuickTap = touchDuration < 450 && screenMoveDist < 25;
+    const camSettings = getResponsiveCameraSettings();
+    const dragThreshold = camSettings.isPortrait ? 0.36 : 0.48;
 
     if (ribbon === 'orange') {
       const distDragged = orangePoints[4].distanceTo(orangePointsDefault[4]);
-      if (distDragged > 0.12 || screenMoveDist > 16 || isQuickTap) {
+      if (distDragged > dragThreshold) {
         animateRibbonSlide('orange');
       } else {
         orangePoints.forEach((pt, idx) => {
@@ -1119,15 +1086,15 @@
             x: orangePointsDefault[idx].x,
             y: orangePointsDefault[idx].y,
             z: orangePointsDefault[idx].z,
-            duration: 0.32,
-            ease: 'power2.out',
+            duration: 0.4,
+            ease: 'elastic.out(1, 0.5)',
             onUpdate: idx === 4 ? updateOrangeTailMesh : null
           });
         });
       }
     } else if (ribbon === 'blue') {
       const distDragged = bluePoints[4].distanceTo(bluePointsDefault[4]);
-      if (distDragged > 0.12 || screenMoveDist > 16 || isQuickTap) {
+      if (distDragged > dragThreshold) {
         animateRibbonSlide('blue');
       } else {
         bluePoints.forEach((pt, idx) => {
@@ -1135,8 +1102,8 @@
             x: bluePointsDefault[idx].x,
             y: bluePointsDefault[idx].y,
             z: bluePointsDefault[idx].z,
-            duration: 0.32,
-            ease: 'power2.out',
+            duration: 0.4,
+            ease: 'elastic.out(1, 0.5)',
             onUpdate: idx === 4 ? updateBlueTailMesh : null
           });
         });
@@ -1232,38 +1199,20 @@
       delay: 0.2
     });
 
-    // 3D Card rises from pedestal & scales to fit cleanly inside the screen on desktop & mobile!
-    const camSettings = getResponsiveCameraSettings();
-    const targetCardScale = camSettings.isPortrait ? 1.24 : 1.12;
-    const targetCardY = 2.65;
-
+    // 3D Card rises from pedestal
     gsap.to(cardGroup.position, {
-      y: targetCardY,
-      duration: 1.25,
+      y: 2.75,
+      duration: 1.35,
       ease: 'power3.out',
       delay: 0.35
     });
     gsap.to(cardGroup.scale, {
-      x: targetCardScale,
-      y: targetCardScale,
-      z: targetCardScale,
-      duration: 1.25,
+      x: 1.22,
+      y: 1.22,
+      z: 1.22,
+      duration: 1.35,
       ease: 'power3.out',
       delay: 0.35
-    });
-
-    // Camera settles at the ideal overview distance so the entire card & open box fit cleanly in screen!
-    const openCamY = camSettings.isPortrait ? 17.2 : 14.2;
-    gsap.to(camera.position, {
-      x: 0,
-      y: openCamY,
-      z: 0.001,
-      duration: 1.25,
-      ease: 'power2.out',
-      delay: 0.25,
-      onUpdate: () => {
-        camera.lookAt(0, 0, 0);
-      }
     });
 
     // LAUNCH CELEBRATION CONFETTI SPRAYING LEFT & RIGHT!
@@ -1285,7 +1234,6 @@
     isBoxOpened = false;
     orangeUntied = false;
     blueUntied = false;
-    const camSettings = getResponsiveCameraSettings();
 
     cardModal.classList.remove('active');
     confettiParticles = [];
@@ -1305,18 +1253,6 @@
     gsap.to(wallPivots.back.rotation, { x: 0, duration: 0.85, ease: 'power2.inOut' });
     gsap.to(wallPivots.front.rotation, { x: 0, duration: 0.85, ease: 'power2.inOut' });
 
-    // Smoothly return camera to closed box overview
-    gsap.to(camera.position, {
-      x: 0,
-      y: camSettings.topY,
-      z: 0.001,
-      duration: 0.85,
-      ease: 'power2.inOut',
-      onUpdate: () => {
-        camera.lookAt(0, 0, 0);
-      }
-    });
-
     gsap.to(cardGroup.position, { y: BASE_HEIGHT + 0.46, duration: 0.75, ease: 'power2.in' });
     gsap.to(cardGroup.scale, { x: 1, y: 1, z: 1, duration: 0.75, ease: 'power2.in' });
 
@@ -1326,24 +1262,15 @@
 
     orangePoints = orangePointsDefault.map(p => p.clone());
     bluePoints = bluePointsDefault.map(p => p.clone());
-    orangePoints.forEach(p => gsap.killTweensOf(p));
-    bluePoints.forEach(p => gsap.killTweensOf(p));
-    activeDraggingRibbon = null;
-    hoveredRibbon = null;
     updateOrangeTailMesh();
     updateBlueTailMesh();
-    if (!presentGroup.children.includes(orangeHit)) presentGroup.add(orangeHit);
-    if (!presentGroup.children.includes(blueHit)) presentGroup.add(blueHit);
+    presentGroup.add(orangeHit);
+    presentGroup.add(blueHit);
   }
 
   // Click on 3D Card to re-open lightbox if closed
-  let lastModalCloseTime = 0;
-
   function onSceneClick(e) {
     if (!isBoxOpened || !cardHitMesh) return;
-    if (cardModal.classList.contains('active')) return;
-    if (Date.now() - lastModalCloseTime < 500) return;
-
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -1356,13 +1283,7 @@
     }
   }
 
-  function onModalClose(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    }
-    lastModalCloseTime = Date.now();
+  function onModalClose() {
     cardModal.classList.remove('active');
     if (isBoxOpened) {
       viewBoxBtn.style.display = 'inline-flex';
@@ -1371,25 +1292,7 @@
   }
 
   modalClose.addEventListener('click', onModalClose);
-  modalClose.addEventListener('touchend', onModalClose);
   modalBackdrop.addEventListener('click', onModalClose);
-  modalBackdrop.addEventListener('touchend', onModalClose);
-
-  const modalWrapper = document.querySelector('.modal-wrapper');
-  if (modalWrapper) {
-    modalWrapper.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-    modalWrapper.addEventListener('touchend', (e) => {
-      e.stopPropagation();
-    });
-  }
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && cardModal.classList.contains('active')) {
-      onModalClose(e);
-    }
-  });
 
   // --- Show Closed Box & Restart Cinematic Camera Orbit Intro ---
   function showClosedBoxIntro() {
@@ -1435,8 +1338,6 @@
     knotGroup.rotation.set(0, 0, 0);
 
     // Ribbons back on box
-    orangePoints.forEach(p => gsap.killTweensOf(p));
-    bluePoints.forEach(p => gsap.killTweensOf(p));
     orangePoints = orangePointsDefault.map(p => p.clone());
     bluePoints = bluePointsDefault.map(p => p.clone());
     updateOrangeTailMesh();
@@ -1463,14 +1364,8 @@
     camera.fov = camSettings.fov;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-
     if (canInteract && !isBoxOpened) {
-      camera.position.set(0, camSettings.topY, 0.001);
-      camera.lookAt(0, 0, 0);
-    } else if (isBoxOpened) {
-      const openCamY = camSettings.isPortrait ? 17.2 : 14.2;
-      camera.position.set(0, openCamY, 0.001);
-      camera.lookAt(0, 0, 0);
+      camera.position.y = camSettings.topY;
     }
   }
 
@@ -1485,8 +1380,7 @@
   window.addEventListener('touchmove', onPointerMove, { passive: false });
   window.addEventListener('mouseup', onPointerUp);
   window.addEventListener('touchend', onPointerUp);
-  window.addEventListener('touchcancel', onPointerUp);
-  renderer.domElement.addEventListener('click', onSceneClick);
+  window.addEventListener('click', onSceneClick);
 
   // Animation Loop
   const clock = new THREE.Clock();
@@ -1495,7 +1389,7 @@
     const time = clock.getElapsedTime();
 
     if (isBoxOpened) {
-      cardGroup.position.y = 2.65 + Math.sin(time * 1.5) * 0.035;
+      cardGroup.position.y = 2.75 + Math.sin(time * 1.5) * 0.04;
     }
 
     if (dustParticles.length > 0) {
