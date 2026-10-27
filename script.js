@@ -40,6 +40,7 @@
   const portalView = document.getElementById('portalView');
   const presentView = document.getElementById('presentView');
   const notificationTrigger = document.getElementById('notificationTrigger');
+  const viewBoxBtn = document.getElementById('viewBoxBtn');
   const resetBtn = document.getElementById('resetBtn');
   const cardModal = document.getElementById('cardModal');
   const modalClose = document.getElementById('modalClose');
@@ -726,12 +727,18 @@
     }
   }
 
+  let cameraIntroTween = null;
+
   // --- Cinematic 3D Camera Orbit -> Top POV ---
   function playCinematicCameraIntro() {
     canInteract = false;
     const camSettings = getResponsiveCameraSettings();
     camera.fov = camSettings.fov;
     camera.updateProjectionMatrix();
+
+    if (cameraIntroTween) {
+      cameraIntroTween.kill();
+    }
 
     const orbit = { angle: 0, height: camSettings.orbitH, radius: camSettings.orbitR };
     camera.position.set(0, orbit.height, orbit.radius);
@@ -742,6 +749,7 @@
         canInteract = true;
       }
     });
+    cameraIntroTween = tl;
 
     tl.to(orbit, {
       angle: Math.PI * 2,
@@ -1072,7 +1080,8 @@
     });
 
     setTimeout(createSubtleGoldDust, 400);
-    resetBtn.style.display = 'inline-flex';
+    viewBoxBtn.style.display = 'none';
+    resetBtn.style.display = 'none';
 
     // DIRECTLY AUTO-OPEN & ZOOM THE CARD INTO FULLSCREEN LIGHTBOX!
     setTimeout(() => {
@@ -1087,6 +1096,7 @@
     blueUntied = false;
 
     cardModal.classList.remove('active');
+    viewBoxBtn.style.display = 'none';
     resetBtn.style.display = 'none';
 
     gsap.to(wallPivots.left.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
@@ -1119,14 +1129,29 @@
     const intersects = raycaster.intersectObject(cardHitMesh);
     if (intersects.length > 0) {
       cardModal.classList.add('active');
+      viewBoxBtn.style.display = 'none';
+      resetBtn.style.display = 'none';
     }
   }
 
-  modalClose.addEventListener('click', () => {
+  function onModalClose() {
     cardModal.classList.remove('active');
-  });
-  modalBackdrop.addEventListener('click', () => {
-    cardModal.classList.remove('active');
+    if (isBoxOpened) {
+      viewBoxBtn.style.display = 'inline-flex';
+      resetBtn.style.display = 'inline-flex';
+    }
+  }
+
+  modalClose.addEventListener('click', onModalClose);
+  modalBackdrop.addEventListener('click', onModalClose);
+
+  viewBoxBtn.addEventListener('click', () => {
+    if (cardModal.classList.contains('active')) {
+      cardModal.classList.remove('active');
+    }
+    viewBoxBtn.style.display = 'inline-flex';
+    resetBtn.style.display = 'inline-flex';
+    playCinematicCameraIntro();
   });
 
   resetBtn.addEventListener('click', resetBox);
