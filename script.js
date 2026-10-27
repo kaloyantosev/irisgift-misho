@@ -1301,8 +1301,13 @@
   }
 
   // Click on 3D Card to re-open lightbox if closed
+  let lastModalCloseTime = 0;
+
   function onSceneClick(e) {
     if (!isBoxOpened || !cardHitMesh) return;
+    if (cardModal.classList.contains('active')) return;
+    if (Date.now() - lastModalCloseTime < 500) return;
+
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -1315,7 +1320,13 @@
     }
   }
 
-  function onModalClose() {
+  function onModalClose(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+    lastModalCloseTime = Date.now();
     cardModal.classList.remove('active');
     if (isBoxOpened) {
       viewBoxBtn.style.display = 'inline-flex';
@@ -1324,7 +1335,25 @@
   }
 
   modalClose.addEventListener('click', onModalClose);
+  modalClose.addEventListener('touchend', onModalClose);
   modalBackdrop.addEventListener('click', onModalClose);
+  modalBackdrop.addEventListener('touchend', onModalClose);
+
+  const modalWrapper = document.querySelector('.modal-wrapper');
+  if (modalWrapper) {
+    modalWrapper.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    modalWrapper.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && cardModal.classList.contains('active')) {
+      onModalClose(e);
+    }
+  });
 
   // --- Show Closed Box & Restart Cinematic Camera Orbit Intro ---
   function showClosedBoxIntro() {
@@ -1420,7 +1449,7 @@
   window.addEventListener('touchmove', onPointerMove, { passive: false });
   window.addEventListener('mouseup', onPointerUp);
   window.addEventListener('touchend', onPointerUp);
-  window.addEventListener('click', onSceneClick);
+  renderer.domElement.addEventListener('click', onSceneClick);
 
   // Animation Loop
   const clock = new THREE.Clock();

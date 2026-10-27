@@ -616,13 +616,13 @@ html, body {
 .card-modal {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-modal.active {
@@ -633,8 +633,9 @@ html, body {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(11, 26, 48, 0.82);
+  background: rgba(11, 26, 48, 0.85);
   backdrop-filter: blur(16px);
+  cursor: pointer;
 }
 
 .modal-wrapper {
@@ -645,6 +646,7 @@ html, body {
   transform: scale(0.7) translateY(35px);
   opacity: 0;
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+  pointer-events: auto;
 }
 
 .card-modal.active .modal-wrapper {
@@ -665,20 +667,23 @@ html, body {
   position: absolute;
   top: -18px;
   right: -18px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--iris-orange);
   border: 2px solid #ffffff;
   color: #ffffff;
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
   transition: transform 0.25s ease, background 0.25s ease;
+  z-index: 50;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .modal-close:hover {
@@ -858,10 +863,12 @@ html, body {
   }
   .modal-close {
     top: -14px;
-    right: -14px;
-    width: 44px;
-    height: 44px;
-    font-size: 26px;
+    right: -10px;
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    z-index: 50;
+    touch-action: manipulation;
   }
   .drag-hint-pill {
     bottom: 22px;
