@@ -45,14 +45,37 @@
   const modalClose = document.getElementById('modalClose');
   const modalBackdrop = document.getElementById('modalBackdrop');
 
+  // --- Responsive Camera Calculations (Desktop & Mobile) ---
+  function getResponsiveCameraSettings() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const aspect = w / h;
+    const isPortrait = aspect < 1.0;
+
+    let fov = 38;
+    let topY = 12.2;
+    let orbitR = 12.8;
+    let orbitH = 6.6;
+
+    if (isPortrait) {
+      fov = Math.min(56, 38 / Math.max(aspect * 1.12, 0.48));
+      topY = 13.5 / Math.max(aspect * 1.1, 0.58);
+      orbitR = 14.5 / Math.max(aspect * 1.15, 0.65);
+      orbitH = 7.8;
+    }
+
+    return { aspect, isPortrait, fov, topY, orbitR, orbitH };
+  }
+
   // --- Three.js Scene Setup ---
   const container = document.getElementById('webglContainer');
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xdbeafe);
   scene.fog = new THREE.Fog(0xdbeafe, 18, 42);
 
-  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 8.2, 13.5);
+  const initCam = getResponsiveCameraSettings();
+  const camera = new THREE.PerspectiveCamera(initCam.fov, initCam.aspect, 0.1, 100);
+  camera.position.set(0, initCam.orbitH, initCam.orbitR);
   camera.lookAt(0, 1.0, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -624,7 +647,7 @@
   let blueTailMesh = createWavyTailMesh(bluePoints, 0.48, 0.024, blueRibbonMaterial);
   presentGroup.add(blueTailMesh);
 
-  const hitGeo = new THREE.SphereGeometry(0.65, 12, 12);
+  const hitGeo = new THREE.SphereGeometry(1.05, 12, 12);
   const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
   const orangeHit = new THREE.Mesh(hitGeo, hitMat);
@@ -706,8 +729,11 @@
   // --- Cinematic 3D Camera Orbit -> Top POV ---
   function playCinematicCameraIntro() {
     canInteract = false;
+    const camSettings = getResponsiveCameraSettings();
+    camera.fov = camSettings.fov;
+    camera.updateProjectionMatrix();
 
-    const orbit = { angle: 0, height: 6.6, radius: 12.8 };
+    const orbit = { angle: 0, height: camSettings.orbitH, radius: camSettings.orbitR };
     camera.position.set(0, orbit.height, orbit.radius);
     camera.lookAt(0, 1.1, 0);
 
@@ -731,7 +757,7 @@
 
     tl.to(camera.position, {
       x: 0,
-      y: 12.2,
+      y: camSettings.topY,
       z: 0.001,
       duration: 1.9,
       ease: 'power3.out',
@@ -797,9 +823,11 @@
       if (picked === 'orange' && !orangeUntied) {
         activeDraggingRibbon = 'orange';
         document.body.style.cursor = 'grabbing';
+        if (e.cancelable) e.preventDefault();
       } else if (picked === 'blue' && !blueUntied) {
         activeDraggingRibbon = 'blue';
         document.body.style.cursor = 'grabbing';
+        if (e.cancelable) e.preventDefault();
       }
     }
   }
@@ -824,6 +852,7 @@
     }
 
     if (!activeDraggingRibbon) return;
+    if (e.cancelable) e.preventDefault();
 
     raycaster.setFromCamera(mouse, camera);
     if (raycaster.ray.intersectPlane(dragPlane, planeIntersect)) {
@@ -900,9 +929,12 @@
 
     gsap.to(knotGroup.position, { x: KNOT_X, z: KNOT_Z, duration: 0.3, ease: 'power2.out' });
 
+    const camSettings = getResponsiveCameraSettings();
+    const dragThreshold = camSettings.isPortrait ? 0.36 : 0.48;
+
     if (ribbon === 'orange') {
       const distDragged = orangePoints[4].distanceTo(orangePointsDefault[4]);
-      if (distDragged > 0.5) {
+      if (distDragged > dragThreshold) {
         animateRibbonSlide('orange');
       } else {
         orangePoints.forEach((pt, idx) => {
@@ -918,7 +950,7 @@
       }
     } else if (ribbon === 'blue') {
       const distDragged = bluePoints[4].distanceTo(bluePointsDefault[4]);
-      if (distDragged > 0.5) {
+      if (distDragged > dragThreshold) {
         animateRibbonSlide('blue');
       } else {
         bluePoints.forEach((pt, idx) => {
@@ -1099,10 +1131,20 @@
 
   resetBtn.addEventListener('click', resetBox);
 
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  function handleResize() {
+    const camSettings = getResponsiveCameraSettings();
+    camera.aspect = camSettings.aspect;
+    camera.fov = camSettings.fov;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    if (canInteract && !isBoxOpened) {
+      camera.position.y = camSettings.topY;
+    }
+  }
+
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(handleResize, 180);
   });
 
   window.addEventListener('mousedown', onPointerDown);
