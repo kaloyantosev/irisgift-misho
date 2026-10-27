@@ -45,6 +45,7 @@
   const cardModal = document.getElementById('cardModal');
   const modalClose = document.getElementById('modalClose');
   const modalBackdrop = document.getElementById('modalBackdrop');
+  const dragHint = document.getElementById('dragHint');
 
   // --- Responsive Camera Calculations (Desktop & Mobile) ---
   function getResponsiveCameraSettings() {
@@ -861,6 +862,7 @@
   // --- Cinematic 3D Camera Orbit -> Top POV ---
   function playCinematicCameraIntro() {
     canInteract = false;
+    if (dragHint) dragHint.classList.remove('visible');
     const camSettings = getResponsiveCameraSettings();
     camera.fov = camSettings.fov;
     camera.updateProjectionMatrix();
@@ -876,6 +878,9 @@
     const tl = gsap.timeline({
       onComplete: () => {
         canInteract = true;
+        if (!isBoxOpened && dragHint) {
+          dragHint.classList.add('visible');
+        }
       }
     });
     cameraIntroTween = tl;
@@ -960,10 +965,12 @@
       if (picked === 'orange' && !orangeUntied) {
         activeDraggingRibbon = 'orange';
         document.body.style.cursor = 'grabbing';
+        if (dragHint) dragHint.classList.remove('visible');
         if (e.cancelable) e.preventDefault();
       } else if (picked === 'blue' && !blueUntied) {
         activeDraggingRibbon = 'blue';
         document.body.style.cursor = 'grabbing';
+        if (dragHint) dragHint.classList.remove('visible');
         if (e.cancelable) e.preventDefault();
       }
     }
@@ -1212,6 +1219,7 @@
     setTimeout(createConfettiBurst, 150);
     setTimeout(createSubtleGoldDust, 350);
 
+    if (dragHint) dragHint.classList.remove('visible');
     viewBoxBtn.style.display = 'none';
     resetBtn.style.display = 'none';
 
@@ -1233,6 +1241,12 @@
 
     viewBoxBtn.style.display = 'inline-flex';
     resetBtn.style.display = 'none';
+
+    if (dragHint) {
+      setTimeout(() => {
+        if (!isBoxOpened) dragHint.classList.add('visible');
+      }, 750);
+    }
 
     gsap.to(wallPivots.left.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
     gsap.to(wallPivots.right.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
@@ -1285,6 +1299,8 @@
     if (cardModal.classList.contains('active')) {
       cardModal.classList.remove('active');
     }
+
+    if (dragHint) dragHint.classList.remove('visible');
 
     // Clear confetti
     confettiParticles = [];

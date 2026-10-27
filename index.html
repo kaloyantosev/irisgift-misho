@@ -155,6 +155,24 @@
     <!-- Celebration Confetti Overlay Canvas -->
     <canvas id="confettiCanvas"></canvas>
 
+    <!-- Interactive Drag Hint below the Gift Box -->
+    <div class="drag-hint-pill" id="dragHint" aria-live="polite">
+      <div class="drag-hint-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+          <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
+          <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+          <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
+        </svg>
+      </div>
+      <span class="drag-hint-text">плъзни лентата на панделката</span>
+      <div class="drag-hint-arrows" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="drag-arrow-svg">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+    </div>
+
   </div> <!-- /present-view-container -->
 
 
