@@ -677,6 +677,135 @@
     blueHit.position.copy(bluePoints[3]);
   }
 
+  // Celebration Confetti System (Sprays Left & Right)
+  const confettiCanvas = document.getElementById('confettiCanvas');
+  const cctx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+  let confettiParticles = [];
+  let confettiAnimId = null;
+
+  function resizeConfettiCanvas() {
+    if (!confettiCanvas || !cctx) return;
+    confettiCanvas.width = window.innerWidth * window.devicePixelRatio;
+    confettiCanvas.height = window.innerHeight * window.devicePixelRatio;
+    cctx.setTransform(1, 0, 0, 1, 0, 0);
+    cctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  resizeConfettiCanvas();
+
+  function createConfettiBurst() {
+    if (!confettiCanvas || !cctx) return;
+    resizeConfettiCanvas();
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const originX = w * 0.5;
+    const originY = h * 0.62;
+
+    const colors = [
+      '#f26f21', '#ea580c', // IRIS Orange
+      '#0284c7', '#0369a1', // IRIS Blue
+      '#fbbf24', '#f59e0b', // Celebration Gold
+      '#f43f5e', '#ec4899', // Hot Pink
+      '#10b981', '#059669', // Emerald
+      '#38bdf8', '#06b6d4', // Cyan
+      '#a855f7',            // Royal Purple
+      '#ffffff'             // Sparkle White
+    ];
+
+    function spawnSide(isLeft, count, speedMul) {
+      for (let i = 0; i < count; i++) {
+        // Left cone: angles 118° to 165° | Right cone: angles 15° to 62°
+        const angle = isLeft
+          ? Math.PI * (0.64 + Math.random() * 0.28)
+          : Math.PI * (0.08 + Math.random() * 0.28);
+
+        const speed = (16 + Math.random() * 22) * speedMul;
+        const shapes = ['rect', 'rect', 'circle', 'strip'];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+        confettiParticles.push({
+          x: originX + (Math.random() - 0.5) * 50,
+          y: originY + (Math.random() - 0.5) * 24,
+          vx: Math.cos(angle) * speed,
+          vy: -Math.sin(angle) * speed,
+          gravity: 0.44 + Math.random() * 0.16,
+          friction: 0.966,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.16,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.08 + Math.random() * 0.1,
+          size: 7 + Math.random() * 8,
+          length: shape === 'strip' ? 18 + Math.random() * 14 : 9 + Math.random() * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          shape: shape,
+          opacity: 1,
+          decay: 0.0035 + Math.random() * 0.0035,
+          drift: (isLeft ? -1 : 1) * (0.4 + Math.random() * 0.8)
+        });
+      }
+    }
+
+    // Wave 1: Immediate powerful explosion Left & Right
+    spawnSide(true, 75, 1.0);  // Left
+    spawnSide(false, 75, 1.0); // Right
+
+    // Wave 2: Fast follow-up pop higher to Left & Right
+    setTimeout(() => {
+      spawnSide(true, 55, 1.18);  // Left
+      spawnSide(false, 55, 1.18); // Right
+    }, 160);
+
+    if (!confettiAnimId) {
+      animateConfetti();
+    }
+  }
+
+  function animateConfetti() {
+    if (!confettiCanvas || !cctx) return;
+    cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (let i = confettiParticles.length - 1; i >= 0; i--) {
+      const p = confettiParticles[i];
+      p.vx *= p.friction;
+      p.vy = p.vy * p.friction + p.gravity;
+      p.x += p.vx + p.drift;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      p.wobble += p.wobbleSpeed;
+      p.opacity -= p.decay;
+
+      if (p.opacity <= 0 || p.y > window.innerHeight + 60) {
+        confettiParticles.splice(i, 1);
+        continue;
+      }
+
+      cctx.save();
+      cctx.globalAlpha = Math.max(0, p.opacity);
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rotation);
+      cctx.scale(Math.cos(p.wobble), 1);
+
+      cctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        cctx.beginPath();
+        cctx.arc(0, 0, p.size * 0.5, 0, Math.PI * 2);
+        cctx.fill();
+      } else if (p.shape === 'strip') {
+        cctx.fillRect(-p.size * 0.35, -p.length * 0.5, p.size * 0.7, p.length);
+      } else {
+        cctx.fillRect(-p.size * 0.5, -p.length * 0.5, p.size, p.length);
+      }
+      cctx.restore();
+    }
+
+    if (confettiParticles.length > 0) {
+      confettiAnimId = requestAnimationFrame(animateConfetti);
+    } else {
+      confettiAnimId = null;
+      cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+  }
+
   // Golden Dust on Open
   let dustParticles = [];
   const dustGroup = new THREE.Group();
@@ -1079,7 +1208,10 @@
       delay: 0.35
     });
 
-    setTimeout(createSubtleGoldDust, 400);
+    // LAUNCH CELEBRATION CONFETTI SPRAYING LEFT & RIGHT!
+    setTimeout(createConfettiBurst, 150);
+    setTimeout(createSubtleGoldDust, 350);
+
     viewBoxBtn.style.display = 'none';
     resetBtn.style.display = 'none';
 
@@ -1096,7 +1228,10 @@
     blueUntied = false;
 
     cardModal.classList.remove('active');
-    viewBoxBtn.style.display = 'none';
+    confettiParticles = [];
+    if (cctx) cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    viewBoxBtn.style.display = 'inline-flex';
     resetBtn.style.display = 'none';
 
     gsap.to(wallPivots.left.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
@@ -1145,18 +1280,69 @@
   modalClose.addEventListener('click', onModalClose);
   modalBackdrop.addEventListener('click', onModalClose);
 
-  viewBoxBtn.addEventListener('click', () => {
+  // --- Show Closed Box & Restart Cinematic Camera Orbit Intro ---
+  function showClosedBoxIntro() {
     if (cardModal.classList.contains('active')) {
       cardModal.classList.remove('active');
     }
+
+    // Clear confetti
+    confettiParticles = [];
+    if (cctx) cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    // Reset state flags
+    isBoxOpened = false;
+    orangeUntied = false;
+    blueUntied = false;
+    activeDraggingRibbon = null;
+    hoveredRibbon = null;
+
+    // Reset wall pivots immediately to closed upright position (0)
+    gsap.killTweensOf(wallPivots.left.rotation);
+    gsap.killTweensOf(wallPivots.right.rotation);
+    gsap.killTweensOf(wallPivots.back.rotation);
+    gsap.killTweensOf(wallPivots.front.rotation);
+    wallPivots.left.rotation.z = 0;
+    wallPivots.right.rotation.z = 0;
+    wallPivots.back.rotation.x = 0;
+    wallPivots.front.rotation.x = 0;
+
+    // Card inside box
+    gsap.killTweensOf(cardGroup.position);
+    gsap.killTweensOf(cardGroup.scale);
+    cardGroup.position.set(0, BASE_HEIGHT + 0.46, 0);
+    cardGroup.scale.set(1, 1, 1);
+
+    // Knot on top
+    gsap.killTweensOf(knotGroup.position);
+    gsap.killTweensOf(knotGroup.scale);
+    gsap.killTweensOf(knotGroup.rotation);
+    knotGroup.position.set(KNOT_X, KNOT_Y, KNOT_Z);
+    knotGroup.scale.set(1, 1, 1);
+    knotGroup.rotation.set(0, 0, 0);
+
+    // Ribbons back on box
+    orangePoints = orangePointsDefault.map(p => p.clone());
+    bluePoints = bluePointsDefault.map(p => p.clone());
+    updateOrangeTailMesh();
+    updateBlueTailMesh();
+    if (!presentGroup.children.includes(orangeHit)) presentGroup.add(orangeHit);
+    if (!presentGroup.children.includes(blueHit)) presentGroup.add(blueHit);
+
+    // Keep buttons accessible
     viewBoxBtn.style.display = 'inline-flex';
     resetBtn.style.display = 'inline-flex';
+
+    // Play full 360 cinematic camera orbit rotation around the CLOSED box!
     playCinematicCameraIntro();
-  });
+  }
+
+  viewBoxBtn.addEventListener('click', showClosedBoxIntro);
 
   resetBtn.addEventListener('click', resetBox);
 
   function handleResize() {
+    resizeConfettiCanvas();
     const camSettings = getResponsiveCameraSettings();
     camera.aspect = camSettings.aspect;
     camera.fov = camSettings.fov;
