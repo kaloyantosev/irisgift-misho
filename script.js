@@ -1199,14 +1199,14 @@
       delay: 0.2
     });
 
-    // 3D Card rises prominently and scales up to be large, crisp & readable on mobile & desktop!
+    // 3D Card rises from pedestal & scales to fit cleanly inside the screen on desktop & mobile!
     const camSettings = getResponsiveCameraSettings();
-    const targetCardScale = camSettings.isPortrait ? 1.95 : 1.42;
-    const targetCardY = camSettings.isPortrait ? 3.35 : 2.9;
+    const targetCardScale = camSettings.isPortrait ? 1.24 : 1.12;
+    const targetCardY = 2.65;
 
     gsap.to(cardGroup.position, {
       y: targetCardY,
-      duration: 1.35,
+      duration: 1.25,
       ease: 'power3.out',
       delay: 0.35
     });
@@ -1214,23 +1214,22 @@
       x: targetCardScale,
       y: targetCardScale,
       z: targetCardScale,
-      duration: 1.35,
+      duration: 1.25,
       ease: 'power3.out',
       delay: 0.35
     });
 
-    // Camera smoothly glides closer to frame the open card in rich, readable detail!
-    const openCamY = camSettings.isPortrait ? 10.8 : 8.8;
-    const openCamZ = camSettings.isPortrait ? 1.6 : 1.1;
+    // Camera settles at the ideal overview distance so the entire card & open box fit cleanly in screen!
+    const openCamY = camSettings.isPortrait ? 17.2 : 14.2;
     gsap.to(camera.position, {
       x: 0,
       y: openCamY,
-      z: openCamZ,
-      duration: 1.4,
+      z: 0.001,
+      duration: 1.25,
       ease: 'power2.out',
       delay: 0.25,
       onUpdate: () => {
-        camera.lookAt(0, targetCardY * 0.55, 0);
+        camera.lookAt(0, 0, 0);
       }
     });
 
@@ -1430,11 +1429,9 @@
       camera.position.set(0, camSettings.topY, 0.001);
       camera.lookAt(0, 0, 0);
     } else if (isBoxOpened) {
-      const openCamY = camSettings.isPortrait ? 10.8 : 8.8;
-      const openCamZ = camSettings.isPortrait ? 1.6 : 1.1;
-      const targetCardY = camSettings.isPortrait ? 3.35 : 2.9;
-      camera.position.set(0, openCamY, openCamZ);
-      camera.lookAt(0, targetCardY * 0.55, 0);
+      const openCamY = camSettings.isPortrait ? 17.2 : 14.2;
+      camera.position.set(0, openCamY, 0.001);
+      camera.lookAt(0, 0, 0);
     }
   }
 
@@ -1458,8 +1455,7 @@
     const time = clock.getElapsedTime();
 
     if (isBoxOpened) {
-      const targetCardY = getResponsiveCameraSettings().isPortrait ? 3.35 : 2.9;
-      cardGroup.position.y = targetCardY + Math.sin(time * 1.5) * 0.04;
+      cardGroup.position.y = 2.65 + Math.sin(time * 1.5) * 0.035;
     }
 
     if (dustParticles.length > 0) {
