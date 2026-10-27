@@ -55,15 +55,15 @@
     const isPortrait = aspect < 1.0;
 
     let fov = 38;
-    let topY = 12.2;
-    let orbitR = 12.8;
-    let orbitH = 6.6;
+    let topY = 11.5;
+    let orbitR = 12.5;
+    let orbitH = 6.4;
 
     if (isPortrait) {
-      fov = Math.min(56, 38 / Math.max(aspect * 1.12, 0.48));
-      topY = 13.5 / Math.max(aspect * 1.1, 0.58);
-      orbitR = 14.5 / Math.max(aspect * 1.15, 0.65);
-      orbitH = 7.8;
+      fov = 48;
+      topY = Math.min(18.0, 11.8 / Math.max(aspect * 1.15, 0.58));
+      orbitR = Math.min(15.0, 11.2 / Math.max(aspect * 1.15, 0.65));
+      orbitH = 7.2;
     }
 
     return { aspect, isPortrait, fov, topY, orbitR, orbitH };
@@ -1199,20 +1199,39 @@
       delay: 0.2
     });
 
-    // 3D Card rises from pedestal
+    // 3D Card rises prominently and scales up to be large, crisp & readable on mobile & desktop!
+    const camSettings = getResponsiveCameraSettings();
+    const targetCardScale = camSettings.isPortrait ? 1.95 : 1.42;
+    const targetCardY = camSettings.isPortrait ? 3.35 : 2.9;
+
     gsap.to(cardGroup.position, {
-      y: 2.75,
+      y: targetCardY,
       duration: 1.35,
       ease: 'power3.out',
       delay: 0.35
     });
     gsap.to(cardGroup.scale, {
-      x: 1.22,
-      y: 1.22,
-      z: 1.22,
+      x: targetCardScale,
+      y: targetCardScale,
+      z: targetCardScale,
       duration: 1.35,
       ease: 'power3.out',
       delay: 0.35
+    });
+
+    // Camera smoothly glides closer to frame the open card in rich, readable detail!
+    const openCamY = camSettings.isPortrait ? 10.8 : 8.8;
+    const openCamZ = camSettings.isPortrait ? 1.6 : 1.1;
+    gsap.to(camera.position, {
+      x: 0,
+      y: openCamY,
+      z: openCamZ,
+      duration: 1.4,
+      ease: 'power2.out',
+      delay: 0.25,
+      onUpdate: () => {
+        camera.lookAt(0, targetCardY * 0.55, 0);
+      }
     });
 
     // LAUNCH CELEBRATION CONFETTI SPRAYING LEFT & RIGHT!
@@ -1234,6 +1253,7 @@
     isBoxOpened = false;
     orangeUntied = false;
     blueUntied = false;
+    const camSettings = getResponsiveCameraSettings();
 
     cardModal.classList.remove('active');
     confettiParticles = [];
@@ -1252,6 +1272,18 @@
     gsap.to(wallPivots.right.rotation, { z: 0, duration: 0.85, ease: 'power2.inOut' });
     gsap.to(wallPivots.back.rotation, { x: 0, duration: 0.85, ease: 'power2.inOut' });
     gsap.to(wallPivots.front.rotation, { x: 0, duration: 0.85, ease: 'power2.inOut' });
+
+    // Smoothly return camera to closed box overview
+    gsap.to(camera.position, {
+      x: 0,
+      y: camSettings.topY,
+      z: 0.001,
+      duration: 0.85,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        camera.lookAt(0, 0, 0);
+      }
+    });
 
     gsap.to(cardGroup.position, { y: BASE_HEIGHT + 0.46, duration: 0.75, ease: 'power2.in' });
     gsap.to(cardGroup.scale, { x: 1, y: 1, z: 1, duration: 0.75, ease: 'power2.in' });
@@ -1364,8 +1396,16 @@
     camera.fov = camSettings.fov;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+
     if (canInteract && !isBoxOpened) {
-      camera.position.y = camSettings.topY;
+      camera.position.set(0, camSettings.topY, 0.001);
+      camera.lookAt(0, 0, 0);
+    } else if (isBoxOpened) {
+      const openCamY = camSettings.isPortrait ? 10.8 : 8.8;
+      const openCamZ = camSettings.isPortrait ? 1.6 : 1.1;
+      const targetCardY = camSettings.isPortrait ? 3.35 : 2.9;
+      camera.position.set(0, openCamY, openCamZ);
+      camera.lookAt(0, targetCardY * 0.55, 0);
     }
   }
 
@@ -1389,7 +1429,8 @@
     const time = clock.getElapsedTime();
 
     if (isBoxOpened) {
-      cardGroup.position.y = 2.75 + Math.sin(time * 1.5) * 0.04;
+      const targetCardY = getResponsiveCameraSettings().isPortrait ? 3.35 : 2.9;
+      cardGroup.position.y = targetCardY + Math.sin(time * 1.5) * 0.04;
     }
 
     if (dustParticles.length > 0) {
